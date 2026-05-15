@@ -3,8 +3,8 @@ name: 🚀 Deploy KODA
 on:
   push:
     branches:
-      - main      # → koda.build (produção)
-      - dev       # → kodabuild.com.br (staging)
+      - main
+      - dev
   workflow_dispatch:
     inputs:
       environment:
@@ -43,7 +43,7 @@ jobs:
         run: HUSKY=0 pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Type check
-        run: pnpm run typecheck || true   # warn only, não bloqueia deploy
+        run: pnpm run typecheck || true
 
   # ─────────────────────────────────────────
   # 2. Build
@@ -91,13 +91,12 @@ jobs:
             public/
             package.json
             pnpm-lock.yaml
-            ecosystem.config.cjs
             bindings.sh
             worker-configuration.d.ts
           retention-days: 7
 
   # ─────────────────────────────────────────
-  # 3. Deploy — Produção (main → koda.build)
+  # 3. Deploy Produção (main → koda.build)
   # ─────────────────────────────────────────
   deploy-production:
     name: 🌐 Deploy → koda.build
@@ -122,7 +121,7 @@ jobs:
 
       - name: Deploy to VPS
         run: |
-          # Criar .env.local com todas as vars para o wrangler bindings
+          # Criar .env.local para o wrangler bindings
           cat > .env.local << EOF
           VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}
@@ -137,11 +136,12 @@ jobs:
           rsync -avz --delete \
             -e "ssh -i ~/.ssh/koda_key -o StrictHostKeyChecking=no" \
             build/ public/ package.json pnpm-lock.yaml \
-            ecosystem.config.cjs bindings.sh worker-configuration.d.ts .env.local \
+            bindings.sh worker-configuration.d.ts .env.local \
             root@${{ secrets.VPS_HOST }}:/opt/koda/
 
           # Reiniciar app via PM2
           ssh -i ~/.ssh/koda_key -o StrictHostKeyChecking=no root@${{ secrets.VPS_HOST }} << 'SSH'
+            set -e
             cd /opt/koda
             HUSKY=0 pnpm install --frozen-lockfile --ignore-scripts
             pm2 restart koda-prod --update-env
@@ -159,10 +159,10 @@ jobs:
             echo "❌ Health check falhou: $STATUS"
             exit 1
           fi
-          echo "✅ koda.build está no ar!"
+          echo "✅ https://koda.build está no ar!"
 
   # ─────────────────────────────────────────
-  # 4. Deploy — Staging (dev → kodabuild.com.br)
+  # 4. Deploy Staging (dev → kodabuild.com.br)
   # ─────────────────────────────────────────
   deploy-staging:
     name: 🧪 Deploy → kodabuild.com.br
@@ -200,10 +200,11 @@ jobs:
           rsync -avz --delete \
             -e "ssh -i ~/.ssh/koda_key -o StrictHostKeyChecking=no" \
             build/ public/ package.json pnpm-lock.yaml \
-            ecosystem.config.cjs bindings.sh worker-configuration.d.ts .env.local \
+            bindings.sh worker-configuration.d.ts .env.local \
             root@${{ secrets.VPS_HOST }}:/opt/koda/
 
           ssh -i ~/.ssh/koda_key -o StrictHostKeyChecking=no root@${{ secrets.VPS_HOST }} << 'SSH'
+            set -e
             cd /opt/koda
             HUSKY=0 pnpm install --frozen-lockfile --ignore-scripts
             pm2 restart koda-prod --update-env
@@ -214,5 +215,4 @@ jobs:
         run: |
           sleep 5
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://kodabuild.com.br)
-          echo "HTTP Status: $STATUS"
-          echo "✅ kodabuild.com.br atualizado!"
+          echo "✅ kodabuild.com.br status: $STATUS"
