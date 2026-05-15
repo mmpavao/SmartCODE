@@ -2,8 +2,8 @@
 
 ## Models and Setup
 
-??? question "What are the best models for SmartCODE?"
-For the best experience with SmartCODE, we recommend using the following models from our 19 supported providers:
+??? question "What are the best models for Koda?"
+For the best experience with Koda, we recommend using the following models from our 19 supported providers:
 
     **Top Recommended Models:**
     - **Claude 3.5 Sonnet** (Anthropic): Best overall coder, excellent for complex applications
@@ -54,7 +54,7 @@ You can configure API keys in two ways:
         Never commit API keys to version control. The `.env.local` file is already in `.gitignore`.
 
 ??? question "How do I add a new LLM provider?"
-SmartCODE uses a modular provider architecture. To add a new provider:
+Koda uses a modular provider architecture. To add a new provider:
 
     1. **Create a Provider Class** in `app/lib/modules/llm/providers/your-provider.ts`
     2. **Implement the BaseProvider interface** with your provider's specific logic
@@ -101,7 +101,7 @@ xAI has released several new Grok models with enhanced capabilities:
 ## Best Practices
 
 ??? question "How do I access help and documentation?"
-SmartCODE provides multiple ways to access help and documentation:
+Koda provides multiple ways to access help and documentation:
 
     **Help Icon in Sidebar:**
     - Look for the question mark (?) icon in the sidebar
@@ -118,7 +118,7 @@ SmartCODE provides multiple ways to access help and documentation:
     - **GitHub Issues**: Report bugs and request features
     - **Community Forum**: [thinktank.ottomator.ai](https://thinktank.ottomator.ai)
 
-??? question "How do I get the best results with SmartCODE?"
+??? question "How do I get the best results with Koda?"
 Follow these proven strategies for optimal results:
 
     **Project Setup:**
@@ -138,7 +138,7 @@ Follow these proven strategies for optimal results:
     - **Deploy easily**: Use built-in Vercel, Netlify, or GitHub Pages deployment
 
 ??? question "How do I use MCP (Model Context Protocol) tools?"
-MCP extends SmartCODE's AI capabilities with external tools:
+MCP extends Koda's AI capabilities with external tools:
 
     **Setting up MCP:**
     1. Go to Settings → MCP tab
@@ -154,8 +154,8 @@ MCP extends SmartCODE's AI capabilities with external tools:
 
     The MCP integration allows the AI to interact with external services and data sources during conversations.
 
-??? question "How do I deploy my SmartCODE projects?"
-SmartCODE supports one-click deployment to multiple platforms:
+??? question "How do I deploy my Koda projects?"
+Koda supports one-click deployment to multiple platforms:
 
     **Supported Platforms:**
     - **Vercel**: Go to Settings → Connections → Vercel, then deploy with one click
@@ -169,7 +169,7 @@ SmartCODE supports one-click deployment to multiple platforms:
     - Preview deployments for testing
 
 ??? question "How do I use Git integration features?"
-SmartCODE provides comprehensive Git and GitHub integration:
+Koda provides comprehensive Git and GitHub integration:
 
     **Basic Git Operations:**
     - Import existing repositories by URL
@@ -185,22 +185,22 @@ SmartCODE provides comprehensive Git and GitHub integration:
 
 ## Project Information
 
-??? question "How do I contribute to SmartCODE?"
+??? question "How do I contribute to Koda?"
 Check out our [Contribution Guide](CONTRIBUTING.md) for more details on how to get involved!
 
-??? question "What are the future plans for SmartCODE?"
+??? question "What are the future plans for Koda?"
 Visit our [Roadmap](https://roadmap.sh/r/ottodev-roadmap-2ovzo) for the latest updates.  
  New features and improvements are on the way!
 
 ??? question "Why are there so many open issues/pull requests?"
-SmartCODE began as a small showcase project on @ColeMedin's YouTube channel to explore editing open-source projects with local LLMs. However, it quickly grew into a massive community effort!
+Koda began as a small showcase project on @ColeMedin's YouTube channel to explore editing open-source projects with local LLMs. However, it quickly grew into a massive community effort!
 
     We're forming a team of maintainers to manage demand and streamline issue resolution. The maintainers are rockstars, and we're also exploring partnerships to help the project thrive.
 
 ## New Features & Technologies
 
-??? question "What's new in SmartCODE?"
-Recent major additions to SmartCODE include:
+??? question "What's new in Koda?"
+Recent major additions to Koda include:
 
     **Advanced AI Capabilities:**
     - **19 LLM Providers**: Support for Anthropic, OpenAI, Google, DeepSeek, Cohere, and more
@@ -227,10 +227,10 @@ Recent major additions to SmartCODE include:
     - **Build Optimization**: Automatic configuration for popular frameworks
 
 ??? question "How do I use the new project templates?"
-SmartCODE offers templates for popular frameworks and technologies:
+Koda offers templates for popular frameworks and technologies:
 
     **Getting Started:**
-    1. Start a new project in SmartCODE
+    1. Start a new project in Koda
     2. Browse available templates in the starter selection
     3. Choose your preferred technology stack
     4. The AI will scaffold your project with best practices
@@ -264,7 +264,7 @@ Use Supabase for backend database functionality:
     **Setup Process:**
     1. Create a Supabase project at supabase.com
     2. Get your project URL and API keys
-    3. Configure the connection in your SmartCODE project
+    3. Configure the connection in your Koda project
     4. Use Supabase tools to interact with your database
 
     **Available Features:**
@@ -276,7 +276,7 @@ Use Supabase for backend database functionality:
 
 ## Model Comparisons
 
-??? question "How do local LLMs compare to larger models like Claude 3.5 Sonnet for SmartCODE?"
+??? question "How do local LLMs compare to larger models like Claude 3.5 Sonnet for Koda?"
 While local LLMs are improving rapidly, larger models still offer the best results for complex applications. Here's the current landscape:
 
     **Recommended for Production:**
@@ -342,7 +342,7 @@ If you're having trouble with MCP integrations:
 
     - **Verify server configuration** in Settings → MCP
     - **Check server endpoints** and authentication credentials
-    - **Test server connectivity** outside of SmartCODE
+    - **Test server connectivity** outside of Koda
     - **Review MCP server logs** for specific error messages
     - **Ensure server supports** the MCP protocol version
 
@@ -386,7 +386,7 @@ If the live preview isn't working:
 **Windows-specific issue**: Update the [Visual C++ Redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)
 
 ??? error "Miniflare or Wrangler errors in Windows"
-**Windows development environment**: Install Visual Studio C++ (version 14.40.33816 or later). More details in [GitHub Issues](https://github.com/stackblitz-labs/SmartCODE/issues/19)
+**Windows development environment**: Install Visual Studio C++ (version 14.40.33816 or later). More details in [GitHub Issues](https://github.com/stackblitz-labs/Koda/issues/19)
 
 ??? error "Provider not showing up after adding it"
 If your custom LLM provider isn't appearing:
@@ -402,7 +402,7 @@ If your custom LLM provider isn't appearing:
 ## Get Help & Support
 
 !!! tip "Community Support"
-[Join the SmartCODE Community](https://thinktank.ottomator.ai/c/bolt-diy/17){target=\_blank} for discussions and help
+[Join the Koda Community](https://thinktank.ottomator.ai/c/bolt-diy/17){target=\_blank} for discussions and help
 
 !!! bug "Report Issues"
-[Open an Issue](https://github.com/stackblitz-labs/SmartCODE/issues/19){target=\_blank} in our GitHub Repository
+[Open an Issue](https://github.com/stackblitz-labs/Koda/issues/19){target=\_blank} in our GitHub Repository

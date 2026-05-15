@@ -37,7 +37,7 @@ export const TerminalTabs = memo(() => {
     (index: number) => {
       if (index === 0) {
         return;
-      } // Can't close smartcode terminal
+      } // Can't close koda terminal
 
       const terminalRef = terminalRefs.current.get(index);
 
@@ -153,7 +153,7 @@ export const TerminalTabs = memo(() => {
                       onClick={() => setActiveTerminal(index)}
                     >
                       <div className="i-ph:terminal-window-duotone text-lg" />
-                      SmartCODE Terminal
+                      Koda Terminal
                     </button>
                   ) : (
                     <React.Fragment>
@@ -218,7 +218,7 @@ export const TerminalTabs = memo(() => {
           {Array.from({ length: terminalCount + 1 }, (_, index) => {
             const isActive = activeTerminal === index;
 
-            logger.debug(`Starting smartcode terminal [${index}]`);
+            logger.debug(`Starting koda terminal [${index}]`);
 
             if (index == 0) {
               return (

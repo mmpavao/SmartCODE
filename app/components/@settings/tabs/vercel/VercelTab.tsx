@@ -221,7 +221,7 @@ export default function VercelTab() {
       const testResponse = await fetch('https://api.vercel.com/v2/user', {
         headers: {
           Authorization: `Bearer ${token}`,
-          'User-Agent': 'SmartCODE-app',
+          'User-Agent': 'Koda-app',
         },
       });
 

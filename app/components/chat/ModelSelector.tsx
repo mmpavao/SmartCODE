@@ -3,9 +3,9 @@ import { useEffect, useRef } from 'react';
 import type { ModelInfo } from '~/lib/modules/llm/types';
 import { classNames } from '~/utils/classNames';
 
-// Provedores e modelos exibidos no SmartCODE
-const SMARTCODE_PROVIDERS = ['OpenAI', 'Anthropic', 'Google'];
-const SMARTCODE_MODELS: Record<string, string[]> = {
+// Provedores e modelos exibidos no Koda
+const KODA_PROVIDERS = ['OpenAI', 'Anthropic', 'Google'];
+const KODA_MODELS: Record<string, string[]> = {
   OpenAI: ['gpt-4o', 'gpt-4o-mini', 'o3-mini'],
   Anthropic: ['claude-3-5-sonnet-20241022', 'claude-3-haiku-20240307'],
   Google: ['gemini-1.5-pro-latest', 'gemini-1.5-flash-latest'],
@@ -44,12 +44,12 @@ export const ModelSelector = ({
   const providerSelectRef = useRef<HTMLSelectElement>(null);
   const modelSelectRef = useRef<HTMLSelectElement>(null);
 
-  // Filtrar apenas os provedores suportados pelo SmartCODE
-  const availableProviders = providerList.filter((p) => SMARTCODE_PROVIDERS.includes(p.name));
+  // Filtrar apenas os provedores suportados pelo Koda
+  const availableProviders = providerList.filter((p) => KODA_PROVIDERS.includes(p.name));
 
   // Modelos do provedor atual
   const currentProviderName = provider?.name ?? '';
-  const allowedModels = SMARTCODE_MODELS[currentProviderName] ?? [];
+  const allowedModels = KODA_MODELS[currentProviderName] ?? [];
   const availableModels = modelList.filter(
     (m) => m.provider === currentProviderName && allowedModels.includes(m.name),
   );
@@ -72,7 +72,7 @@ export const ModelSelector = ({
     if (selected) {
       setProvider?.(selected);
       // Reset modelo para o primeiro disponível
-      const firstModel = (SMARTCODE_MODELS[selected.name] ?? [])[0];
+      const firstModel = (KODA_MODELS[selected.name] ?? [])[0];
       if (firstModel) setModel?.(firstModel);
     }
   };

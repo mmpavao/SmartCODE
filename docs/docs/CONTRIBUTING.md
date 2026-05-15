@@ -1,6 +1,6 @@
 # Contribution Guidelines
 
-Welcome! This guide provides all the details you need to contribute effectively to the project. Thank you for helping us make **SmartCODE** a better tool for developers worldwide. 💡
+Welcome! This guide provides all the details you need to contribute effectively to the project. Thank you for helping us make **Koda** a better tool for developers worldwide. 💡
 
 ---
 
@@ -80,7 +80,7 @@ Interested in maintaining and growing the project? Fill out our [Contributor App
 
 - Clone the repository:
   ```bash
-  git clone https://github.com/stackblitz-labs/SmartCODE.git
+  git clone https://github.com/stackblitz-labs/Koda.git
   ```
 - Install dependencies:
   ```bash

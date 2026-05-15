@@ -1,13 +1,13 @@
-# 🚀 SmartCODE
+# 🚀 Koda
 
 > Plataforma de **vibe coding** com time autônomo de super agentes de IA.
-> Fork do [SmartCODE](https://github.com/stackblitz-labs/SmartCODE) — MIT License.
+> Fork do [Koda](https://github.com/stackblitz-labs/Koda) — MIT License.
 
 ---
 
-## O que é o SmartCODE?
+## O que é o Koda?
 
-SmartCODE é uma plataforma onde você descreve o que quer construir em linguagem natural e um **time de agentes de IA especializados** gera, revisa e faz o deploy do código — tudo em tempo real, com preview ao vivo no browser via WebContainers.
+Koda é uma plataforma onde você descreve o que quer construir em linguagem natural e um **time de agentes de IA especializados** gera, revisa e faz o deploy do código — tudo em tempo real, com preview ao vivo no browser via WebContainers.
 
 Estilo Lovable / v0 / Bolt.new, mas com arquitetura multi-agente e totalmente open source.
 
@@ -29,13 +29,13 @@ Estilo Lovable / v0 / Bolt.new, mas com arquitetura multi-agente e totalmente op
 
 ## Roadmap
 
-### ✅ Fase 0 — Base (SmartCODE)
+### ✅ Fase 0 — Base (Koda)
 - Chat + editor + preview ao vivo
 - Suporte a múltiplos LLMs
 - Deploy one-click Vercel/Netlify
 - Import de repos GitHub/GitLab
 
-### 🔄 Fase 1 — MVP SmartCODE
+### 🔄 Fase 1 — MVP Koda
 - [ ] Customização de UI e branding
 - [ ] Auth com NextAuth
 - [ ] Persistência de projetos no banco
@@ -59,8 +59,8 @@ Estilo Lovable / v0 / Bolt.new, mas com arquitetura multi-agente e totalmente op
 
 ```bash
 # Clone o repo
-git clone https://github.com/mmpavao/SmartCODE.git
-cd SmartCODE
+git clone https://github.com/mmpavao/Koda.git
+cd Koda
 
 # Instale as dependências
 pnpm install

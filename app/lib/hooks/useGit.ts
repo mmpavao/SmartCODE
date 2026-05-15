@@ -65,7 +65,7 @@ export function useGit() {
       const headers: {
         [x: string]: string;
       } = {
-        'User-Agent': 'SmartCODE',
+        'User-Agent': 'Koda',
       };
 
       const auth = lookupSavedPassword(url);

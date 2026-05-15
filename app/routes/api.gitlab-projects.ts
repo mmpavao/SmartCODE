@@ -32,7 +32,7 @@ async function gitlabProjectsLoader({ request }: { request: Request }) {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json',
-        'User-Agent': 'SmartCODE-app',
+        'User-Agent': 'Koda-app',
       },
     });
 

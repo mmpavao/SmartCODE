@@ -1,5 +1,5 @@
 {
-  "name": "smartcode",
+  "name": "koda",
   "description": "An AI Agent",
   "private": true,
   "license": "MIT",
@@ -7,8 +7,8 @@
   "type": "module",
   "version": "1.0.0",
   "author": {
-    "name": "SmartCODE team",
-    "email": "maintainers@SmartCODE"
+    "name": "Koda team",
+    "email": "maintainers@Koda"
   },
   "scripts": {
     "deploy": "npm run build && wrangler pages deploy",
@@ -22,9 +22,9 @@
     "start:unix": "bindings=$(./bindings.sh) && wrangler pages dev ./build/client $bindings",
     "start": "node -e \"const { spawn } = require('child_process'); const isWindows = process.platform === 'win32'; const cmd = isWindows ? 'npm run start:windows' : 'npm run start:unix'; const child = spawn(cmd, { shell: true, stdio: 'inherit' }); child.on('exit', code => process.exit(code));\"",
     "dockerstart": "bindings=$(./bindings.sh) && wrangler pages dev ./build/client $bindings --ip 0.0.0.0 --port 5173 --no-show-interactive-dev-session",
-    "dockerrun": "docker run -it -d --name smartcode-live -p 5173:5173 --env-file .env.local bolt-ai",
-    "dockerbuild:prod": "docker build -t smartcode:production -t smartcode:latest --target smartcode-production .",
-    "dockerbuild": "docker build -t smartcode:development -t smartcode:latest --target development .",
+    "dockerrun": "docker run -it -d --name koda-live -p 5173:5173 --env-file .env.local bolt-ai",
+    "dockerbuild:prod": "docker build -t koda:production -t koda:latest --target koda-production .",
+    "dockerbuild": "docker build -t koda:development -t koda:latest --target development .",
     "typecheck": "tsc",
     "typegen": "wrangler types",
     "preview": "pnpm run build && pnpm run start",
