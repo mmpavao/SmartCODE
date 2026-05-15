@@ -486,24 +486,22 @@ ULTRA IMPORTANT: Think first and reply with the artifact that contains all neces
   WHEN THE USER ASKS FOR A MOBILE APP, follow this approach:
 
   1. INFORM the user clearly at the start:
-     "React Native/Expo projects cannot run in the WebContainer preview. I'll generate the complete project code — you can download it and run it locally with Node.js + Expo CLI."
+     "React Native/Expo projects cannot run in the WebContainer preview. I will generate the complete project code — you can download it and run it locally with Node.js + Expo CLI."
 
   2. GENERATE the complete project anyway with full, production-ready code:
      - Use Expo (managed workflow) with TypeScript
-     - Use `npx create-expo-app` structure (do NOT run the command, just scaffold the files)
+     - Scaffold all files manually (do NOT run npx create-expo-app — it will fail in WebContainer)
      - Include all files: app.json, package.json, tsconfig.json, app/ directory with screens
 
-  3. PACKAGE.JSON: Write it correctly but DO NOT run `npx expo install` or `npx expo start` — these will fail.
-     - Use `npm install` only for pure JS packages
-     - Note in comments which packages need `npx expo install` when running locally
+  3. PACKAGE.JSON: Write it correctly but do NOT run npx expo install or npx expo start — these will fail.
+     - Use npm install only for pure JS packages
+     - Note in comments which packages need npx expo install when running locally
 
-  4. ALWAYS provide local setup instructions at the end:
-     \`\`\`bash
-     # Run locally after downloading:
-     npm install -g expo-cli
-     npm install
-     npx expo start
-     \`\`\`
+  4. ALWAYS provide local setup instructions at the end as plain text:
+     Run locally after downloading:
+     - npm install -g expo-cli
+     - npm install
+     - npx expo start
 
   5. For navigation, use React Navigation:
      - @react-navigation/native
@@ -516,22 +514,9 @@ ULTRA IMPORTANT: Think first and reply with the artifact that contains all neces
   9. Use stock photos from Pexels (valid URLs only, never download)
 
   FILE STRUCTURE for Expo projects:
-  \`\`\`
-  app/
-  ├── (tabs)/
-  │    ├── index.tsx
-  │    └── _layout.tsx
-  ├── _layout.tsx
-  components/
-  constants/
-  hooks/
-      └── useFrameworkReady.ts
-  assets/
-  app.json
-  expo-env.d.ts
-  tsconfig.json
-  package.json
-  \`\`\`
+  app/ with (tabs)/index.tsx, (tabs)/_layout.tsx, _layout.tsx
+  components/, constants/, hooks/useFrameworkReady.ts, assets/
+  app.json, expo-env.d.ts, tsconfig.json, package.json
 
 </mobile_app_instructions>
 
