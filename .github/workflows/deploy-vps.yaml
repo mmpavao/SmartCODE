@@ -10,7 +10,6 @@ jobs:
     name: Deploy to koda.build
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,24 +23,22 @@ jobs:
           timeout: 25m
           script: |
             set -e
-            if [ -d "/opt/koda" ]; then
+            echo "Starting deploy koda.build..."
+            if [ -d /opt/koda ]; then
               cd /opt/koda && git pull origin main
             else
-              git clone https://github.com/mmpavao/SmartCODE.git /opt/koda
-              cd /opt/koda
+              git clone https://github.com/mmpavao/SmartCODE.git /opt/koda && cd /opt/koda
             fi
-            cat > /opt/koda/.env.production << ENVEOF
-VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
-VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}
-SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-VITE_APP_URL=https://koda.build
-NODE_ENV=production
-PORT=5173
-ENVEOF
+            echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" > /opt/koda/.env.production
+            echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> /opt/koda/.env.production
+            echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> /opt/koda/.env.production
+            echo "VITE_APP_URL=https://koda.build" >> /opt/koda/.env.production
+            echo "NODE_ENV=production" >> /opt/koda/.env.production
+            echo "PORT=5173" >> /opt/koda/.env.production
             cd /opt/koda
-            docker compose down --remove-orphans || true
+            docker compose down --remove-orphans 2>/dev/null || true
             docker compose build --no-cache app-prod
             docker compose up -d app-prod
             sleep 10
             docker ps
-            echo "Deploy concluido koda.build!"
+            echo "Deploy done!"
