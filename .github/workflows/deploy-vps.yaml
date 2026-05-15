@@ -2,19 +2,8 @@ name: 🚀 Deploy KODA
 
 on:
   push:
-    branches:
-      - main
-      - dev
+    branches: [main, dev]
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Ambiente de deploy'
-        required: true
-        default: 'production'
-        type: choice
-        options:
-          - production
-          - staging
 
 env:
   NODE_VERSION: '22'
@@ -36,83 +25,15 @@ jobs:
       - run: HUSKY=0 pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm run typecheck || true
 
-  build:
-    name: 🏗️ Build
-    runs-on: ubuntu-latest
-    needs: quality
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: HUSKY=0 pnpm install --frozen-lockfile --ignore-scripts
-
-      - name: Create .env
-        run: |
-          VITE_APP_URL=${{ github.ref_name == 'main' && 'https://koda.build' || 'https://kodabuild.com.br' }}
-          cat > .env << EOF
-          VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-          VITE_APP_URL=${VITE_APP_URL}
-          NODE_ENV=production
-          PORT=5173
-          EOF
-          cp .env .env.local
-
-      - name: Build
-        run: NODE_OPTIONS=--max-old-space-size=4096 pnpm run build
-
-      - name: Check build output
-        run: |
-          echo "=== build/ structure ==="
-          ls -la build/
-          ls -la build/client/ | head -10
-          ls -la build/server/ | head -5
-          find build -name "_worker*" | head -5
-
-      - name: Package build as tarball
-        run: |
-          tar czf koda-build.tar.gz \
-            build/ \
-            public/ \
-            package.json \
-            pnpm-lock.yaml \
-            bindings.sh \
-            worker-configuration.d.ts \
-            .env.local
-          ls -lh koda-build.tar.gz
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: koda-build-${{ github.sha }}
-          path: koda-build.tar.gz
-          retention-days: 7
-
   deploy-production:
     name: 🌐 Deploy → koda.build
     runs-on: ubuntu-latest
-    needs: build
+    needs: quality
     if: github.ref_name == 'main'
     environment:
       name: production
       url: https://koda.build
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: koda-build-${{ github.sha }}
-
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -120,64 +41,47 @@ jobs:
           chmod 600 ~/.ssh/koda_key
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
 
-      - name: Deploy to VPS
+      - name: Deploy via git pull + rebuild
         run: |
-          # Enviar tarball para VPS
-          scp -i ~/.ssh/koda_key -o StrictHostKeyChecking=no \
-            koda-build.tar.gz root@${{ secrets.VPS_HOST }}:/opt/koda-build.tar.gz
-
-          # Extrair e reiniciar na VPS
           ssh -i ~/.ssh/koda_key -o StrictHostKeyChecking=no root@${{ secrets.VPS_HOST }} << 'SSH'
             set -e
-            cd /opt
+            cd /opt/koda-src
 
-            echo "→ Extraindo build..."
-            tar xzf koda-build.tar.gz -C /opt/koda
-            rm koda-build.tar.gz
+            echo "→ Pulling latest main..."
+            git pull origin main
 
-            echo "→ Verificando estrutura..."
-            ls /opt/koda/build/
-            ls /opt/koda/build/client/ | head -5
-
-            echo "→ Instalando deps de produção..."
-            cd /opt/koda
+            echo "→ Installing deps..."
             HUSKY=0 pnpm install --frozen-lockfile --ignore-scripts
 
-            echo "→ Reiniciando PM2..."
+            echo "→ Building..."
+            NODE_OPTIONS=--max-old-space-size=3500 pnpm run build
+
+            echo "→ Restarting PM2..."
             pm2 restart koda-prod --update-env
             pm2 save
 
-            sleep 5
-            echo "→ Health check interno..."
-            curl -sI http://localhost:5173 | head -3
-            echo "✅ Deploy concluído: $(date)"
+            sleep 10
+            STATUS=$(curl -sI http://localhost:5173 | head -1)
+            echo "Health: $STATUS"
+            echo "✅ Deploy koda.build: $(date)"
           SSH
 
       - name: Health check
         run: |
-          sleep 8
+          sleep 5
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://koda.build)
           echo "koda.build HTTP: $STATUS"
-          if [ "$STATUS" != "200" ]; then
-            echo "❌ Health check falhou: $STATUS"
-            exit 1
-          fi
-          echo "✅ https://koda.build está no ar!"
+          [ "$STATUS" = "200" ] && echo "✅ koda.build no ar!" || (echo "❌ $STATUS" && exit 1)
 
   deploy-staging:
     name: 🧪 Deploy → kodabuild.com.br
     runs-on: ubuntu-latest
-    needs: build
+    needs: quality
     if: github.ref_name == 'dev'
     environment:
       name: staging
       url: https://kodabuild.com.br
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: koda-build-${{ github.sha }}
-
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -185,25 +89,14 @@ jobs:
           chmod 600 ~/.ssh/koda_key
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
 
-      - name: Deploy to VPS (staging)
+      - name: Deploy staging
         run: |
-          scp -i ~/.ssh/koda_key -o StrictHostKeyChecking=no \
-            koda-build.tar.gz root@${{ secrets.VPS_HOST }}:/opt/koda-build.tar.gz
-
           ssh -i ~/.ssh/koda_key -o StrictHostKeyChecking=no root@${{ secrets.VPS_HOST }} << 'SSH'
             set -e
-            cd /opt
-            # Staging usa mesmo server por enquanto
-            tar xzf koda-build.tar.gz -C /opt/koda
-            rm koda-build.tar.gz
-            cd /opt/koda
+            cd /opt/koda-src
+            git pull origin dev
             HUSKY=0 pnpm install --frozen-lockfile --ignore-scripts
+            NODE_OPTIONS=--max-old-space-size=3500 pnpm run build
             pm2 restart koda-prod --update-env
             echo "✅ Staging deploy: $(date)"
           SSH
-
-      - name: Health check staging
-        run: |
-          sleep 8
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://kodabuild.com.br)
-          echo "✅ kodabuild.com.br status: $STATUS"
