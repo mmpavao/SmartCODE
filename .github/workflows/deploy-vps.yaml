@@ -5,40 +5,66 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: mmpavao/smartcode
+
 jobs:
-  deploy:
-    name: Deploy to koda.build
+  build-and-deploy:
+    name: Build & Deploy to koda.build
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Deploy via SSH
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: bolt-ai-production
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_OPTIONS=--max-old-space-size=6144
+
+      - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: root
           password: ${{ secrets.VPS_PASSWORD }}
-          timeout: 25m
+          timeout: 10m
           script: |
             set -e
-            echo "Starting deploy koda.build..."
-            if [ -d /opt/koda ]; then
-              cd /opt/koda && git pull origin main
-            else
-              git clone https://github.com/mmpavao/SmartCODE.git /opt/koda && cd /opt/koda
-            fi
-            echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" > /opt/koda/.env.production
-            echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> /opt/koda/.env.production
-            echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> /opt/koda/.env.production
-            echo "VITE_APP_URL=https://koda.build" >> /opt/koda/.env.production
-            echo "NODE_ENV=production" >> /opt/koda/.env.production
-            echo "PORT=5173" >> /opt/koda/.env.production
-            cd /opt/koda
-            docker compose down --remove-orphans 2>/dev/null || true
-            docker compose build --no-cache app-prod
-            docker compose up -d app-prod
-            sleep 10
-            docker ps
-            echo "Deploy done!"
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker pull ghcr.io/mmpavao/smartcode:latest
+            docker stop koda-app 2>/dev/null || true
+            docker rm koda-app 2>/dev/null || true
+            docker run -d --name koda-app --restart unless-stopped -p 5173:5173 \
+              -e VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }} \
+              -e VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }} \
+              -e SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }} \
+              -e VITE_APP_URL=https://koda.build \
+              -e NODE_ENV=production \
+              -e PORT=5173 \
+              ghcr.io/mmpavao/smartcode:latest
+            sleep 5
+            docker ps | grep koda-app
+            echo "Deploy concluido koda.build!"
