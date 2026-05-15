@@ -14,6 +14,7 @@ import {
   currentUser,
   isAuthLoading,
 } from '~/lib/stores/kodaAuth';
+import { setUserPlan } from '~/lib/stores/agentMode';
 import type { KodaUser } from '~/lib/stores/kodaAuth';
 
 const SUPABASE_URL = typeof window !== 'undefined'
@@ -60,6 +61,11 @@ export function useKodaAuth() {
     const loaded = loadKodaSessionFromStorage();
     if (!loaded) {
       kodaAuthStore.set({ user: null, session: null, loading: false });
+      setUserPlan('free');
+    } else {
+      // Sincronizar plan com o store de agentMode
+      const state = kodaAuthStore.get();
+      if (state.user?.plan) setUserPlan(state.user.plan as any);
     }
   }, []);
 
@@ -75,6 +81,7 @@ export function useKodaAuth() {
 
     const user = mapToKodaUser(data.user || data);
     setKodaUser(user, { access_token: data.access_token, refresh_token: data.refresh_token });
+    setUserPlan(user.plan as any);
     return user;
   }, []);
 
