@@ -1,7 +1,7 @@
 # 🚀 SmartCODE
 
 > Plataforma de **vibe coding** com time autônomo de super agentes de IA.
-> Fork do [bolt.diy](https://github.com/stackblitz-labs/bolt.diy) — MIT License.
+> Fork do [SmartCODE](https://github.com/stackblitz-labs/SmartCODE) — MIT License.
 
 ---
 
@@ -29,7 +29,7 @@ Estilo Lovable / v0 / Bolt.new, mas com arquitetura multi-agente e totalmente op
 
 ## Roadmap
 
-### ✅ Fase 0 — Base (bolt.diy)
+### ✅ Fase 0 — Base (SmartCODE)
 - Chat + editor + preview ao vivo
 - Suporte a múltiplos LLMs
 - Deploy one-click Vercel/Netlify
