@@ -10,6 +10,7 @@ import { createScopedLogger } from '~/utils/logger';
 import { createFilesContext, extractPropertiesFromMessage } from './utils';
 import { discussPrompt } from '~/lib/common/prompts/discuss-prompt';
 import type { DesignScheme } from '~/types/design-scheme';
+import { searchMemories, saveMemory, formatMemoriesForPrompt, extractProjectInfo } from '~/lib/.server/memory/memoryService';
 
 export type Messages = Message[];
 
@@ -65,6 +66,7 @@ export async function streamText(props: {
   messageSliceId?: number;
   chatMode?: 'discuss' | 'build';
   designScheme?: DesignScheme;
+  userKey?: string;
 }) {
   const {
     messages,
@@ -79,6 +81,7 @@ export async function streamText(props: {
     summary,
     chatMode,
     designScheme,
+    userKey,
   } = props;
   let currentModel = DEFAULT_MODEL;
   let currentProvider = DEFAULT_PROVIDER.name;
@@ -161,6 +164,26 @@ export async function streamText(props: {
         credentials: options?.supabaseConnection?.credentials || undefined,
       },
     }) ?? getSystemPrompt();
+
+  // KODA MEMORY — buscar contexto relevante de sessões anteriores
+  if (userKey && chatMode === 'build') {
+    try {
+      const lastUserMsg = messages.filter(m => m.role === 'user').pop();
+      const queryText = typeof lastUserMsg?.content === 'string'
+        ? lastUserMsg.content
+        : messages.map(m => typeof m.content === 'string' ? m.content : '').join(' ').slice(0, 1000);
+
+      const memories = await searchMemories(queryText, userKey, { threshold: 0.70, limit: 4 });
+
+      if (memories.length > 0) {
+        const memoryContext = formatMemoriesForPrompt(memories);
+        systemPrompt = `${memoryContext}\n\n${systemPrompt}`;
+        logger.debug(`Injected ${memories.length} memories for user: ${userKey}`);
+      }
+    } catch (memErr) {
+      logger.warn('Memory search failed (non-blocking):', memErr);
+    }
+  }
 
   if (chatMode === 'build' && contextFiles && contextOptimization) {
     const codeContext = createFilesContext(contextFiles, true);
