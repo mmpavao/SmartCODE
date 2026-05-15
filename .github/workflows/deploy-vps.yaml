@@ -1,0 +1,47 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to koda.build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: root
+          password: ${{ secrets.VPS_PASSWORD }}
+          timeout: 25m
+          script: |
+            set -e
+            if [ -d "/opt/koda" ]; then
+              cd /opt/koda && git pull origin main
+            else
+              git clone https://github.com/mmpavao/SmartCODE.git /opt/koda
+              cd /opt/koda
+            fi
+            cat > /opt/koda/.env.production << ENVEOF
+VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
+VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}
+SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+VITE_APP_URL=https://koda.build
+NODE_ENV=production
+PORT=5173
+ENVEOF
+            cd /opt/koda
+            docker compose down --remove-orphans || true
+            docker compose build --no-cache app-prod
+            docker compose up -d app-prod
+            sleep 10
+            docker ps
+            echo "Deploy concluido koda.build!"
