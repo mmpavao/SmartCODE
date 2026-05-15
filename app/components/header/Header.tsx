@@ -17,10 +17,18 @@ export function Header() {
     >
       <div className="flex items-center gap-2 z-logo text-bolt-elements-textPrimary cursor-pointer">
         <div className="i-ph:sidebar-simple-duotone text-xl" />
-        <a href="/" className="text-2xl font-semibold text-accent flex items-center gap-2">
-          <img src="/logo-dark.png" alt="Koda" className="h-7 inline-block" />
-          <span className="text-lg font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-            Koda
+        <a href="/" className="flex items-center gap-2 no-underline">
+          <img src="/logo-dark.png" alt="Koda" className="h-6 w-6 rounded-md object-cover" />
+          <span
+            className="text-xl font-bold tracking-tight"
+            style={{
+              background: 'linear-gradient(135deg, #7C3AED 0%, #0EA5E9 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            koda
           </span>
         </a>
       </div>
