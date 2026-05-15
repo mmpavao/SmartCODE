@@ -12,6 +12,7 @@ import { WORK_DIR } from '~/utils/constants';
 import { createSummary } from '~/lib/.server/llm/create-summary';
 import { extractPropertiesFromMessage } from '~/lib/.server/llm/utils';
 import type { DesignScheme } from '~/types/design-scheme';
+import { saveMemory, extractProjectInfo } from '~/lib/.server/memory/memoryService';
 import { MCPService } from '~/lib/services/mcpService';
 import { StreamRecoveryManager } from '~/lib/.server/llm/stream-recovery';
 
@@ -68,6 +69,13 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
     }>();
 
   const cookieHeader = request.headers.get('Cookie');
+
+  // KODA MEMORY — identificar usuário via header ou cookie (sem auth por enquanto)
+  const userKeyHeader = request.headers.get('x-koda-user') || '';
+  const cookies = cookieHeader ? Object.fromEntries(
+    cookieHeader.split(';').map(c => c.trim().split('=').map(decodeURIComponent))
+  ) : {};
+  const userKey = userKeyHeader || cookies['koda_user_key'] || 'default';
   const apiKeys = JSON.parse(parseCookies(cookieHeader || '').apiKeys || '{}');
   const providerSettings: Record<string, IProviderSetting> = JSON.parse(
     parseCookies(cookieHeader || '').providers || '{}',
@@ -246,6 +254,30 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
               await new Promise((resolve) => setTimeout(resolve, 0));
 
               // stream.close();
+
+              // KODA MEMORY — salvar memória da sessão de forma assíncrona (non-blocking)
+              if (chatMode === 'build' && messages.length >= 2) {
+                try {
+                  const { summary, projectName, techStack } = extractProjectInfo(
+                    messages.map(m => ({
+                      role: m.role,
+                      content: typeof m.content === 'string' ? m.content : ''
+                    }))
+                  );
+                  const chatId = generateId();
+                  saveMemory({
+                    session_id: chatId,
+                    user_key: userKey,
+                    content: summary.slice(0, 2000),
+                    project_name: projectName,
+                    tech_stack: techStack,
+                    metadata: { model: currentModel, turn_count: messages.length },
+                  }).catch(() => {}); // fire-and-forget
+                } catch (_memErr) {
+                  // Non-blocking — never fail the response
+                }
+              }
+
               return;
             }
 
@@ -267,6 +299,7 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
             });
 
             const result = await streamText({
+              userKey,
               messages: [...processedMessages],
               env: context.cloudflare?.env,
               options,
