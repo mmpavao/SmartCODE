@@ -1,48 +1,71 @@
 services:
   app-prod:
-    image: bolt-ai:production
+    image: koda:production
     build:
       context: .
       dockerfile: Dockerfile
       target: bolt-ai-production
     ports:
       - '5173:5173'
-    env_file: 
-      - '.env'
-      - '.env.local'
+    env_file:
+      - '.env.production'
     environment:
       - NODE_ENV=production
-      - COMPOSE_PROFILES=production
-      # No strictly needed but serving as hints for Coolify
       - PORT=5173
-      - GROQ_API_KEY=${GROQ_API_KEY}
-      - HuggingFace_API_KEY=${HuggingFace_API_KEY}
+      - RUNNING_IN_DOCKER=true
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - OPEN_ROUTER_API_KEY=${OPEN_ROUTER_API_KEY}
-      - GOOGLE_GENERATIVE_AI_API_KEY=${GOOGLE_GENERATIVE_AI_API_KEY}
-      - OLLAMA_API_BASE_URL=${OLLAMA_API_BASE_URL}
-      - XAI_API_KEY=${XAI_API_KEY}
-      - TOGETHER_API_KEY=${TOGETHER_API_KEY}
-      - TOGETHER_API_BASE_URL=${TOGETHER_API_BASE_URL}
-      - AWS_BEDROCK_CONFIG=${AWS_BEDROCK_CONFIG}
-      - VITE_LOG_LEVEL=${VITE_LOG_LEVEL:-debug}
+      - GOOGLE_GENERATIVE_AI_API_KEY=${GOOGLE_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - VITE_APP_URL=${VITE_APP_URL:-https://koda.build}
+      - VITE_LOG_LEVEL=${VITE_LOG_LEVEL:-info}
+      - DEFAULT_NUM_CTX=${DEFAULT_NUM_CTX:-32768}
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:5173/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    profiles:
+      - production
+
+  app-staging:
+    image: koda:staging
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: bolt-ai-production
+    ports:
+      - '5174:5173'
+    env_file:
+      - '.env.staging'
+    environment:
+      - NODE_ENV=production
+      - PORT=5173
+      - RUNNING_IN_DOCKER=true
+      - VITE_APP_URL=https://kodabuild.com.br
+      - VITE_LOG_LEVEL=debug
       - DEFAULT_NUM_CTX=${DEFAULT_NUM_CTX:-32768}
       - RUNNING_IN_DOCKER=true
     extra_hosts:
       - 'host.docker.internal:host-gateway'
-    command: pnpm run dockerstart
+    restart: unless-stopped
     profiles:
-      - production
+      - staging
 
   app-dev:
-    image: bolt-ai:development
+    image: koda:development
     build:
       context: .
       dockerfile: Dockerfile
       target: development
-    env_file: 
-      - '.env'
+    env_file:
       - '.env.local'
     environment:
       - NODE_ENV=development
@@ -52,19 +75,6 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
       - PORT=5173
-      - GROQ_API_KEY=${GROQ_API_KEY}
-      - HuggingFace_API_KEY=${HuggingFace_API_KEY}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - OPEN_ROUTER_API_KEY=${OPEN_ROUTER_API_KEY}
-      - XAI_API_KEY=${XAI_API_KEY}
-      - GOOGLE_GENERATIVE_AI_API_KEY=${GOOGLE_GENERATIVE_AI_API_KEY}
-      - OLLAMA_API_BASE_URL=${OLLAMA_API_BASE_URL}
-      - TOGETHER_API_KEY=${TOGETHER_API_KEY}
-      - TOGETHER_API_BASE_URL=${TOGETHER_API_BASE_URL}
-      - AWS_BEDROCK_CONFIG=${AWS_BEDROCK_CONFIG}
-      - VITE_LOG_LEVEL=${VITE_LOG_LEVEL:-debug}
-      - DEFAULT_NUM_CTX=${DEFAULT_NUM_CTX:-32768}
       - RUNNING_IN_DOCKER=true
     extra_hosts:
       - 'host.docker.internal:host-gateway'
@@ -76,23 +86,4 @@ services:
       - /app/node_modules
     ports:
       - '5173:5173'
-    command: pnpm run dev --host 0.0.0.0
     profiles: ['development', 'default']
-
-  app-prebuild:
-    image: ghcr.io/stackblitz-labs/bolt.diy:latest
-    ports:
-      - '5173:5173'
-    environment:
-      - NODE_ENV=production
-      - COMPOSE_PROFILES=production
-      # No strictly needed but serving as hints for Coolify
-      - PORT=5173
-      - OLLAMA_API_BASE_URL=http://127.0.0.1:11434
-      - DEFAULT_NUM_CTX=${DEFAULT_NUM_CTX:-32768}
-      - RUNNING_IN_DOCKER=true
-    extra_hosts:
-      - 'host.docker.internal:host-gateway'
-    command: pnpm run dockerstart
-    profiles:
-      - prebuilt
