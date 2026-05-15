@@ -16,6 +16,7 @@ import Cookies from 'js-cookie';
 import { debounce } from '~/utils/debounce';
 import { useSettings } from '~/lib/hooks/useSettings';
 import type { ProviderInfo } from '~/types/model';
+import { useNativeProviders } from '~/lib/hooks/useNativeProviders';
 import { useSearchParams } from '@remix-run/react';
 import { createSampler } from '~/utils/sampler';
 import { getTemplates, selectStarterTemplate } from '~/utils/selectStarterTemplate';
@@ -114,6 +115,17 @@ export const ChatImpl = memo(
     const [animationScope, animate] = useAnimate();
     const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
     const [chatMode, setChatMode] = useState<'discuss' | 'build'>('build');
+
+    // KODA NATIVE PROVIDERS — auto-selecionar provider/model baseado nas chaves nativas do servidor
+    useNativeProviders({
+      onProviderDetected: (providerName, modelName) => {
+        const found = providerList.find((p: ProviderInfo) => p.name === providerName);
+        if (found) {
+          setProvider(found);
+          setModel(modelName);
+        }
+      },
+    });
     const [selectedElement, setSelectedElement] = useState<ElementInfo | null>(null);
     const mcpSettings = useMCPStore((state) => state.settings);
 
